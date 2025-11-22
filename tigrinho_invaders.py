@@ -39,7 +39,7 @@ def move_sprite(sprite, anchor, x_min=0, y_min=0, x_max=largura_janela, y_max=al
                 anchor.move(0, dY)
                 sprite.move(0, dY)
 
-def colisao_do_tiro(tiro_anchor, sprite_anchor):
+def colisao_do_tiro(tiro_anchor, sprite_anchor): # compara as coordenadas do tiro e da sprite escolhida para determinar se estão se colidindo (retorna True ou False)
     tiro_y = tiro_anchor.getY()
     tiro_x = tiro_anchor.getX()
     sprite_y = sprite_anchor.getY()
@@ -118,7 +118,7 @@ while tecla != 'Escape':
         i[0].move(0, -1)
         i[1].move(0, -1)
         for ini in lista_inimigos:
-            if colisao_do_tiro(i[1], ini[1]):
+            if colisao_do_tiro(i[1], ini[1]): # usa a funçao de colisao de tiro, se True, ele destrói o inimigo e o tiro
                 i[0].undraw()
                 lista_de_tiros.remove(i)
                 ini[0].undraw()
