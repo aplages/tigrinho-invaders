@@ -39,6 +39,15 @@ def move_sprite(sprite, anchor, x_min=0, y_min=0, x_max=largura_janela, y_max=al
                 anchor.move(0, dY)
                 sprite.move(0, dY)
 
+def colisao_do_tiro(tiro_anchor, sprite_anchor):
+    tiro_y = tiro_anchor.getY()
+    tiro_x = tiro_anchor.getX()
+    sprite_y = sprite_anchor.getY()
+    sprite_x = sprite_anchor.getX()
+    if -20 <= (int(tiro_x) - int(sprite_x)) <= 20:
+        if -20 <= (int(tiro_y) - int(sprite_y)) <= 20:
+            return True
+    return False
 
 
 ##
@@ -57,7 +66,7 @@ tecla = ''
 lista_de_tiros = []
 tiro_p1_liberado = True # essa variável será usada para impedir que o jogador spamme tiros
 delay_de_tiro = 0 # usado para "recarregar" o tiro antes de poder atirar novamente
-ini = []
+lista_inimigos = []
 
 while tecla != 'Escape':
 
@@ -108,28 +117,33 @@ while tecla != 'Escape':
     for i in lista_de_tiros: # loop para mover todos tiros da lista
         i[0].move(0, -1)
         i[1].move(0, -1)
+        for ini in lista_inimigos:
+            if colisao_do_tiro(i[1], ini[1]):
+                i[0].undraw()
+                lista_de_tiros.remove(i)
+                ini[0].undraw()
+                lista_inimigos.remove(ini)
         if i[1].getY() <= 0: # caso o tiro ultrapasse o limite da janela, ele é "destruido"
            i[0].undraw()
            lista_de_tiros.pop(0) # remove o tiro da lista, o índice teoricamente é sempre 0 por que o mais antigo sempre estará o mais longe e será o primeiro da lista
 
 
 
-    if len(ini) < 4:
+    if len(lista_inimigos) < 4:
         posix_ini = rd.randint(15, 585)
         ini_sprite = gf.Image(gf.Point(posix_ini, 0), "inimigo.png") #sprite inimigo
         ini_anchor = gf.Point(posix_ini, 0) # ancora inimigo
         ini_sprite.draw(win)
-        ini.append([ini_sprite, ini_anchor])
+        lista_inimigos.append([ini_sprite, ini_anchor])
     
 
 
-    for j in ini:
+    for j in lista_inimigos: # loop para mover todos os inimigos da lista
         j[0].move(0, 0.2)
         j[1].move(0, 0.2)
         if j[1].getY() >= 650: # caso o inimigo chegue na base ele é destruido
             j[0].undraw()
-            ini.remove(j)
+            lista_inimigos.remove(j)
 
-    print(ini)
 
     sleep(0.0016) # delay dos quadros do jogo
