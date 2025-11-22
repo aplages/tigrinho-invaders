@@ -1,0 +1,103 @@
+import graphics as gf
+from time import sleep
+largura_janela = 600
+altura_janela = 800
+win = gf.GraphWin("Teste de Jogo", largura_janela, altura_janela)
+win.setBackground("gray")
+
+def move_sprite(sprite, anchor, x_min=0, y_min=0, x_max=largura_janela, y_max=altura_janela, dX=0, dY=0):
+    # função usada para mover o sprite e a ancora juntos
+    # é possivel dar um limite usando (x_min, y_min, x_max, y_max)
+        # x_min # limite mínimo para o eixo X, o padrão é 0
+        # y_min # limite mínimo para o eixo y, o padrão é 0
+        # x_max # limite máximo para o eixo X, o padrão é a largura da janela
+        # y_max # limite máximo para o eixo Y, o padrão é a altura da janela
+    # dx: velocidade para direçao do vetor X; o padrão é 0
+    # dY: velocidade para direçao do vetor Y; o padrão é 0
+    if dX != 0:
+        if dX > 0:
+            if anchor.getX() < x_max:
+                anchor.move(dX, 0)
+                sprite.move(dX, 0)
+        elif dX < 0:
+            if anchor.getX() > x_min:
+                anchor.move(dX, 0)
+                sprite.move(dX, 0)
+    elif dY != 0:
+        if dY > 0:
+            if anchor.getY() < y_max:
+                anchor.move(0, dY)
+                sprite.move(0, dY)
+        elif dY < 0:
+            if anchor.getY() > y_min:
+                anchor.move(0, dY)
+                sprite.move(0, dY)
+
+##
+bolinha = gf.Point(300, 725) # Referência Player
+p1 = gf.Image(gf.Point(300, 725), "mineiro.png") # Player sprite
+p1.draw(win)
+##
+
+##
+base = gf.Rectangle(gf.Point(5, 650), gf.Point(595, 795)) # Area limite para se mexer (**ajustar o limite)
+base.draw(win)
+##
+
+vel = 5 # velocidade do jogador
+tecla = ''
+lista_de_tiros = []
+tiro_p1_liberado = True # essa variável será usada para impedir que o jogador spamme tiros
+delay_de_tiro = 0 # usado para "recarregar" o tiro antes de poder atirar novamente
+while tecla != 'Escape':
+
+    
+
+    tecla = win.checkKey()
+    clique = win.checkMouse()
+    temp = []
+
+
+    if tecla == "Right":
+        print("Pra direita")
+        move_sprite(sprite=p1, anchor=bolinha, x_min=20, y_min=660, x_max=580, y_max=780, dX=vel)
+
+    elif tecla == "Left":
+        print("Pra Esquerda")
+        move_sprite(sprite=p1, anchor=bolinha, x_min=20, y_min=660, x_max=580, y_max=780, dX=-vel)
+    
+    elif tecla == "Up":
+        print("Pra Cima")
+        move_sprite(sprite=p1, anchor=bolinha, x_min=20, y_min=660, x_max=580, y_max=780, dY=-vel)
+
+    elif tecla == "Down":
+        print("Pra Baixo")
+        move_sprite(sprite=p1, anchor=bolinha, x_min=20, y_min=660, x_max=580, y_max=780, dY=vel)
+    
+    if not tiro_p1_liberado:
+        delay_de_tiro += 1 # se o tiro está carregando, ele aumenta o numero
+        if delay_de_tiro == 500: # se o numero chega em 500, o delay termina
+            tiro_p1_liberado = True
+            delay_de_tiro = 0
+    
+    if clique != '' and clique != None:
+        tiro_p1_sprite = gf.Image(gf.Point(bolinha.getX(), bolinha.getY()), "tiro.png") # sprite do tiro
+        tiro_p1_anchor = gf.Point(bolinha.getX(), bolinha.getY()) # ancora do tiro
+        
+        if tiro_p1_liberado:
+            tiro_p1_sprite.draw(win)
+            temp.append(tiro_p1_sprite) # vai ser o indice [0]
+            temp.append(tiro_p1_anchor) # vai ser o indice [1]
+            lista_de_tiros.append(temp) # cada tiro faz parte de uma lista
+            tiro_p1_liberado = False
+
+
+    
+    for i in lista_de_tiros: # loop para mover todos tiros da lista
+        i[0].move(0, -1)
+        i[1].move(0, -1)
+        if i[1].getY() <= 0: # caso o tiro ultrapasse o limite da janela, ele é "destruido"
+           i[0].undraw()
+           lista_de_tiros.pop(0) # remove o tiro da lista, o índice teoricamente é sempre 0 por que o mais antigo sempre estará o mais longe e será o primeiro da lista
+
+    sleep(0.0016) # delay dos quadros do jogo
