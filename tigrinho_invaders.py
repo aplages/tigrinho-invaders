@@ -1,8 +1,12 @@
 import graphics as gf
+import random as rd
 from time import sleep
+
 largura_janela = 600
 altura_janela = 800
 win = gf.GraphWin("Teste de Jogo", largura_janela, altura_janela)
+fundo = gf.Image(gf.Point(largura_janela/2, altura_janela/2 ), "fundo.png")
+fundo.draw(win)
 win.setBackground("gray")
 
 def move_sprite(sprite, anchor, x_min=0, y_min=0, x_max=largura_janela, y_max=altura_janela, dX=0, dY=0):
@@ -14,6 +18,8 @@ def move_sprite(sprite, anchor, x_min=0, y_min=0, x_max=largura_janela, y_max=al
         # y_max # limite máximo para o eixo Y, o padrão é a altura da janela
     # dx: velocidade para direçao do vetor X; o padrão é 0
     # dY: velocidade para direçao do vetor Y; o padrão é 0
+    
+    
     if dX != 0:
         if dX > 0:
             if anchor.getX() < x_max:
@@ -33,6 +39,8 @@ def move_sprite(sprite, anchor, x_min=0, y_min=0, x_max=largura_janela, y_max=al
                 anchor.move(0, dY)
                 sprite.move(0, dY)
 
+
+
 ##
 bolinha = gf.Point(300, 725) # Referência Player
 p1 = gf.Image(gf.Point(300, 725), "mineiro.png") # Player sprite
@@ -40,7 +48,7 @@ p1.draw(win)
 ##
 
 ##
-base = gf.Rectangle(gf.Point(5, 650), gf.Point(595, 795)) # Area limite para se mexer (**ajustar o limite)
+base = gf.Rectangle(gf.Point(5, 650), gf.Point(595, 795)) # Area limite para se mexer
 base.draw(win)
 ##
 
@@ -49,9 +57,13 @@ tecla = ''
 lista_de_tiros = []
 tiro_p1_liberado = True # essa variável será usada para impedir que o jogador spamme tiros
 delay_de_tiro = 0 # usado para "recarregar" o tiro antes de poder atirar novamente
+ini = []
+
 while tecla != 'Escape':
 
     
+
+
 
     tecla = win.checkKey()
     clique = win.checkMouse()
@@ -99,5 +111,25 @@ while tecla != 'Escape':
         if i[1].getY() <= 0: # caso o tiro ultrapasse o limite da janela, ele é "destruido"
            i[0].undraw()
            lista_de_tiros.pop(0) # remove o tiro da lista, o índice teoricamente é sempre 0 por que o mais antigo sempre estará o mais longe e será o primeiro da lista
+
+
+
+    if len(ini) < 4:
+        posix_ini = rd.randint(15, 585)
+        ini_sprite = gf.Image(gf.Point(posix_ini, 0), "inimigo.png") #sprite inimigo
+        ini_anchor = gf.Point(posix_ini, 0) # ancora inimigo
+        ini_sprite.draw(win)
+        ini.append([ini_sprite, ini_anchor])
+    
+
+
+    for j in ini:
+        j[0].move(0, 0.2)
+        j[1].move(0, 0.2)
+        if j[1].getY() >= 650: # caso o inimigo chegue na base ele é destruido
+            j[0].undraw()
+            ini.remove(j)
+
+    print(ini)
 
     sleep(0.0016) # delay dos quadros do jogo
