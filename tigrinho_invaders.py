@@ -5,8 +5,7 @@ from time import sleep
 largura_janela = 600
 altura_janela = 800
 win = gf.GraphWin("Teste de Jogo", largura_janela, altura_janela)
-fundo = gf.Image(gf.Point(largura_janela/2, altura_janela/2 ), "fundo.png")
-fundo.draw(win)
+
 win.setBackground("gray")
 
 def move_sprite(sprite, anchor, x_min=0, y_min=0, x_max=largura_janela, y_max=altura_janela, dX=0, dY=0):
@@ -49,8 +48,30 @@ def colisao_do_tiro(tiro_anchor, sprite_anchor): # compara as coordenadas do tir
             return True
     return False
 
+## MENU INICIAL
+fundo = gf.Image(gf.Point(largura_janela/2, altura_janela/2 ), "tigrinho_fundo.png")
+fundo.draw(win)
+
+botao_play = gf.Rectangle(gf.Point((largura_janela/2)-80, (altura_janela/2)-20), gf.Point((largura_janela/2)+80, (altura_janela/2)+20))
+botao_play.draw(win).setFill('white')
+texto_play = gf.Text(gf.Point(largura_janela/2, altura_janela/2), 'Jogar').draw(win)
+
+teste = win.getMouse()
+
+while True:
+    if ((largura_janela/2)-80) <= teste.getX() <= ((largura_janela/2)+80) and ((altura_janela/2)-20) <= teste.getY() <= ((altura_janela/2)+20):
+        break
+    teste = win.getMouse()
+##
+
+
+
+## JOGO
+fundo = gf.Image(gf.Point(largura_janela/2, altura_janela/2 ), "fundo.png")
+fundo.draw(win)
 
 ##
+
 bolinha = gf.Point(300, 725) # Referência Player
 p1 = gf.Image(gf.Point(300, 725), "mineiro.png") # Player sprite
 p1.draw(win)
@@ -123,6 +144,7 @@ while tecla != 'Escape':
                 lista_de_tiros.remove(i)
                 ini[0].undraw()
                 lista_inimigos.remove(ini)
+                break
         if i[1].getY() <= 0: # caso o tiro ultrapasse o limite da janela, ele é "destruido"
            i[0].undraw()
            lista_de_tiros.pop(0) # remove o tiro da lista, o índice teoricamente é sempre 0 por que o mais antigo sempre estará o mais longe e será o primeiro da lista
