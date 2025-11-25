@@ -5,6 +5,10 @@ from time import sleep
 largura_janela = 600
 altura_janela = 800
 win = gf.GraphWin("Teste de Jogo", largura_janela, altura_janela)
+pontuaçao_tela = gf.Rectangle(gf.Point(450, 10), gf.Point(590, 40))
+pontuaçao_tela.draw(win).setFill('white')
+
+
 
 win.setBackground("gray")
 
@@ -17,8 +21,6 @@ def move_sprite(sprite, anchor, x_min=0, y_min=0, x_max=largura_janela, y_max=al
         # y_max # limite máximo para o eixo Y, o padrão é a altura da janela
     # dx: velocidade para direçao do vetor X; o padrão é 0
     # dY: velocidade para direçao do vetor Y; o padrão é 0
-    
-    
     if dX != 0:
         if dX > 0:
             if anchor.getX() < x_max:
@@ -60,7 +62,7 @@ teste = win.getMouse()
 
 while True:
     if ((largura_janela/2)-80) <= teste.getX() <= ((largura_janela/2)+80) and ((altura_janela/2)-20) <= teste.getY() <= ((altura_janela/2)+20):
-        break
+        break # sai da tela inicial e inicia o jogo
     teste = win.getMouse()
 ##
 
@@ -69,7 +71,10 @@ while True:
 ## JOGO
 fundo = gf.Image(gf.Point(largura_janela/2, altura_janela/2 ), "fundo.png")
 fundo.draw(win)
-
+pontuaçao_tela = gf.Rectangle(gf.Point(450, 10), gf.Point(590, 40)) #Visor da pontuação
+pontuaçao_tela.draw(win).setFill('gray')
+pontuaçao = 0
+pontuaçao_texto = gf.Text(gf.Point(520, 25), pontuaçao).draw(win) # mostra a pontuação
 ##
 
 bolinha = gf.Point(300, 725) # Referência Player
@@ -88,12 +93,26 @@ lista_de_tiros = []
 tiro_p1_liberado = True # essa variável será usada para impedir que o jogador spamme tiros
 delay_de_tiro = 0 # usado para "recarregar" o tiro antes de poder atirar novamente
 lista_inimigos = []
+lista_vidas = []
+posi_vida = 40
+
+
+while len(lista_vidas) < 3:
+    vida_sprite = gf.Image(gf.Point(posi_vida, 30), "vidas.png") #sprite vida
+    vida_anchor = gf.Point(posi_vida, 40) #ancora vida
+    vida_sprite.draw(win)
+    lista_vidas.append([vida_sprite, vida_anchor])
+    posi_vida += 30
 
 while tecla != 'Escape':
 
-    
 
-
+    if len(lista_vidas) == 0:
+        fim_tela = gf.Rectangle(gf.Point(0, 0), gf.Point(largura_janela, altura_janela))
+        fim_tela.draw(win).setFill('white')
+        fim_text = gf.Text(gf.Point(largura_janela/2, altura_janela/2), "FIM DE JOGO").draw(win)
+        sleep(3)
+        break
 
     tecla = win.checkKey()
     clique = win.checkMouse()
@@ -144,6 +163,9 @@ while tecla != 'Escape':
                 lista_de_tiros.remove(i)
                 ini[0].undraw()
                 lista_inimigos.remove(ini)
+                pontuaçao_texto.undraw()
+                pontuaçao += 1
+                pontuaçao_texto = gf.Text(gf.Point(520, 25), pontuaçao).draw(win)
                 break
         if i[1].getY() <= 0: # caso o tiro ultrapasse o limite da janela, ele é "destruido"
            i[0].undraw()
@@ -166,6 +188,11 @@ while tecla != 'Escape':
         if j[1].getY() >= 650: # caso o inimigo chegue na base ele é destruido
             j[0].undraw()
             lista_inimigos.remove(j)
+            if len(lista_vidas) > 0:
+                vida_perdida = lista_vidas.pop()
+                vida_perdida[0].undraw()
+            else:
+                tecla = 'Escape' # se não tiver mais vidas, o jogo termina
 
 
     sleep(0.0016) # delay dos quadros do jogo
