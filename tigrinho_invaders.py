@@ -186,3 +186,5 @@ with open('ranking_local.txt', 'a') as ranking:
     ranking.close()
     # futuramente irá aceitar um input para o nome do jogador
     # terá opção de olhar o ranking
+
+# teste do kaua
