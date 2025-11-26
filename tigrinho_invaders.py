@@ -98,32 +98,21 @@ while len(lista_vidas) < 3:
     posi_vida += 30
 
 while tecla != 'Escape':
-    if len(lista_vidas) == 0:
-        fim_tela = gf.Rectangle(gf.Point(0, 0), gf.Point(largura_janela, altura_janela))
-        fim_tela.draw(win).setFill('white')
-        fim_text = gf.Text(gf.Point(largura_janela/2, altura_janela/2), f"FIM DE JOGO\n\nSua pontuação foi {pontuacao}").draw(win)
-        sleep(3)
-        break
-
     tecla = win.checkKey()
     clique = win.checkMouse()
     temp = []
 
 
     if tecla == "Right" or tecla == 'd':
-        print("Pra direita")
         move_sprite(sprite=p1, x_min=20, y_min=660, x_max=580, y_max=780, dX=vel)
 
     elif tecla == "Left" or tecla == 'a':
-        print("Pra Esquerda")
         move_sprite(sprite=p1, x_min=20, y_min=660, x_max=580, y_max=780, dX=-vel)
     
     elif tecla == "Up" or tecla == 'w':
-        print("Pra Cima")
         move_sprite(sprite=p1, x_min=20, y_min=660, x_max=580, y_max=780, dY=-vel)
 
     elif tecla == "Down" or tecla == 's':
-        print("Pra Baixo")
         move_sprite(sprite=p1, x_min=20, y_min=660, x_max=580, y_max=780, dY=vel)
     
     if not tiro_p1_liberado:
@@ -172,7 +161,7 @@ while tecla != 'Escape':
         if j.getAnchor().getY() >= 650: # caso o inimigo chegue na base ele é destruido
             j.undraw()
             lista_inimigos.remove(j)
-            if len(lista_vidas) > 0:
+            if len(lista_vidas) > 1:
                 vida_perdida = lista_vidas.pop()
                 vida_perdida.undraw()
             else:
@@ -181,10 +170,17 @@ while tecla != 'Escape':
 
     sleep(0.0016) # delay dos quadros do jogo
 
+
+fim_tela = gf.Rectangle(gf.Point(0, 0), gf.Point(largura_janela, altura_janela))
+fim_tela.draw(win).setFill('white')
+fim_text = gf.Text(gf.Point(largura_janela/2, (altura_janela/2)-20), f"FIM DE JOGO\n\nSua pontuação foi {pontuacao}").draw(win)
+botao_menu = gf.Rectangle(gf.Point((largura_janela/2)-40, (altura_janela/2)+30), gf.Point((largura_janela/2)+40, (altura_janela/2)+70)).draw(win)
+
 with open('ranking_local.txt', 'a') as ranking:
     ranking.write(f'{str(pontuacao)};')
     ranking.close()
     # futuramente irá aceitar um input para o nome do jogador
     # terá opção de olhar o ranking
 
-# teste do kaua
+
+win.getMouse()
