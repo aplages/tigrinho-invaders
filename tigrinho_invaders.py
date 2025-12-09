@@ -46,7 +46,7 @@ def colisao_do_tiro(tiro, sprite): # compara as coordenadas do tiro e da sprite 
     return False
 
 ## MENU INICIAL
-fundo = gf.Image(gf.Point(largura_janela/2, altura_janela/2 ), "tigrinho_fundo.png")
+fundo = gf.Image(gf.Point(largura_janela/2, altura_janela/2 ), "imagens/tigrinho_fundo.png")
 fundo.draw(win)
 
 botao_play = gf.Rectangle(gf.Point((largura_janela/2)-80, (altura_janela/2)-20), gf.Point((largura_janela/2)+80, (altura_janela/2)+20))
@@ -64,7 +64,7 @@ while True:
 
 
 ## JOGO
-fundo = gf.Image(gf.Point(largura_janela/2, altura_janela/2 ), "fundo.png")
+fundo = gf.Image(gf.Point(largura_janela/2, altura_janela/2 ), "imagens/fundo.png")
 fundo.draw(win)
 pontuacao_tela = gf.Rectangle(gf.Point(450, 10), gf.Point(590, 40)) #Visor da pontuação
 pontuacao_tela.draw(win).setFill('gray')
@@ -72,7 +72,7 @@ pontuacao = 0
 pontuacao_texto = gf.Text(gf.Point(520, 25), pontuacao).draw(win) # mostra a pontuação
 ##
 
-p1 = gf.Image(gf.Point(300, 725), "mineiro.png") # Player sprite
+p1 = gf.Image(gf.Point(300, 725), "imagens/mineiro.png") # Player sprite
 p1.draw(win)
 ##
 
@@ -92,7 +92,7 @@ posi_vida = 40
 
 
 while len(lista_vidas) < 3:
-    vida = gf.Image(gf.Point(posi_vida, 30), "vidas.png") #sprite vida
+    vida = gf.Image(gf.Point(posi_vida, 30), "imagens/vidas.png") #sprite vida
     vida.draw(win)
     lista_vidas.append(vida)
     posi_vida += 30
@@ -122,7 +122,7 @@ while tecla != 'Escape':
             delay_de_tiro = 0
     
     if clique != '' and clique != None:
-        tiro_p1 = gf.Image(gf.Point(p1.getAnchor().getX(), p1.getAnchor().getY()), "tiro.png") # sprite do tiro
+        tiro_p1 = gf.Image(gf.Point(p1.getAnchor().getX(), p1.getAnchor().getY()), "imagens/tiro.png") # sprite do tiro
         
         if tiro_p1_liberado:
             tiro_p1.draw(win)
@@ -150,7 +150,7 @@ while tecla != 'Escape':
 
 
     if len(lista_inimigos) < 4:
-        inimigo = gf.Image(gf.Point((randint(15, 585)), 0), "inimigo.png") # sprite inimigo
+        inimigo = gf.Image(gf.Point((randint(15, 585)), 0), "imagens/inimigo.png") # sprite inimigo
         inimigo.draw(win)
         lista_inimigos.append(inimigo)
     
