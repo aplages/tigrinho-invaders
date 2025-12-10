@@ -89,7 +89,9 @@ delay_de_tiro = 0 # usado para "recarregar" o tiro antes de poder atirar novamen
 lista_inimigos = []
 lista_vidas = []
 posi_vida = 40
-
+ciclo = 1
+boss_control = False
+        
 
 while len(lista_vidas) < 3:
     vida = gf.Image(gf.Point(posi_vida, 30), "vidas.png") #sprite vida
@@ -98,21 +100,32 @@ while len(lista_vidas) < 3:
     posi_vida += 30
 
 while tecla != 'Escape':
+    if len(lista_vidas) == 0:
+        fim_tela = gf.Rectangle(gf.Point(0, 0), gf.Point(largura_janela, altura_janela))
+        fim_tela.draw(win).setFill('white')
+        fim_text = gf.Text(gf.Point(largura_janela/2, altura_janela/2), f"FIM DE JOGO\n\nSua pontuação foi {pontuacao}").draw(win)
+        sleep(3)
+        break
+
     tecla = win.checkKey()
     clique = win.checkMouse()
     temp = []
 
 
     if tecla == "Right" or tecla == 'd':
+        print("Pra direita")
         move_sprite(sprite=p1, x_min=20, y_min=660, x_max=580, y_max=780, dX=vel)
 
     elif tecla == "Left" or tecla == 'a':
+        print("Pra Esquerda")
         move_sprite(sprite=p1, x_min=20, y_min=660, x_max=580, y_max=780, dX=-vel)
     
     elif tecla == "Up" or tecla == 'w':
+        print("Pra Cima")
         move_sprite(sprite=p1, x_min=20, y_min=660, x_max=580, y_max=780, dY=-vel)
 
     elif tecla == "Down" or tecla == 's':
+        print("Pra Baixo")
         move_sprite(sprite=p1, x_min=20, y_min=660, x_max=580, y_max=780, dY=vel)
     
     if not tiro_p1_liberado:
@@ -148,33 +161,81 @@ while tecla != 'Escape':
            lista_de_tiros.pop(0) # remove o tiro da lista, o índice teoricamente é sempre 0 por que o mais antigo sempre estará o mais longe e será o primeiro da lista
 
 
-
-    if len(lista_inimigos) < 4:
-        inimigo = gf.Image(gf.Point((randint(15, 585)), 0), "inimigo.png") # sprite inimigo
-        inimigo.draw(win)
-        lista_inimigos.append(inimigo)
-    
-
-
-    for j in lista_inimigos: # loop para mover todos os inimigos da lista
-        j.move(0, 0.2)
-        if j.getAnchor().getY() >= 650: # caso o inimigo chegue na base ele é destruido
-            j.undraw()
-            lista_inimigos.remove(j)
-            if len(lista_vidas) > 1:
-                vida_perdida = lista_vidas.pop()
-                vida_perdida.undraw()
-            else:
-                tecla = 'Escape' # se não tiver mais vidas, o jogo termina
+    if pontuacao < (50 * ciclo):
+        if len(lista_inimigos) < 4:
+            inimigo = gf.Image(gf.Point((randint(15, 585)), 0), "inimigo.png") # sprite inimigo
+            inimigo.draw(win)
+            lista_inimigos.append(inimigo)
+        
 
 
-    sleep(0.0016) # delay dos quadros do jogo
+        for j in lista_inimigos: # loop para mover todos os inimigos da lista
+            j.move(0, 0.2)
+            if j.getAnchor().getY() >= 650: # caso o inimigo chegue na base ele é destruido
+                j.undraw()
+                lista_inimigos.remove(j)
+                if len(lista_vidas) > 0:
+                    vida_perdida = lista_vidas.pop()
+                    vida_perdida.undraw()
+                else:
+                    tecla = 'Escape' # se não tiver mais vidas, o jogo termina
+                    
+    else:
+        
 
+        # Quando a pontuação atingir o alvo
+        if pontuacao >= (30 * ciclo):
 
-fim_tela = gf.Rectangle(gf.Point(0, 0), gf.Point(largura_janela, altura_janela))
-fim_tela.draw(win).setFill('white')
-fim_text = gf.Text(gf.Point(largura_janela/2, (altura_janela/2)-20), f"FIM DE JOGO\n\nSua pontuação foi {pontuacao}").draw(win)
-botao_menu = gf.Rectangle(gf.Point((largura_janela/2)-40, (altura_janela/2)+30), gf.Point((largura_janela/2)+40, (altura_janela/2)+70)).draw(win)
+            # Remove inimigos comuns da tela
+            for ini in lista_inimigos:
+                ini.undraw()
+            lista_inimigos.clear()
+
+            # Criar boss 
+            if not boss_control:
+                boss_control = True
+                boss_vida = 3
+                boss = gf.Image(gf.Point(randint(50, 550), 0), "boss.png")
+                boss.draw(win)
+
+            # Mover boss para baixo
+            boss.move(0, 0.3)
+
+            # Verificar colisão dos tiros com o boss
+            for tiro in lista_de_tiros[:]:  
+                tiro.move(0, -1)
+
+                if colisao_do_tiro(tiro, boss):
+                    tiro.undraw()
+                    lista_de_tiros.remove(tiro)
+                    boss_vida -= 1
+                    print(f"Vida do boss: {boss_vida}")
+
+                    # Se o boss morrer
+                    if boss_vida <= 0:
+                        boss.undraw()
+                        boss_control = False
+                        ciclo += 1
+                        pontuacao += 10
+
+                        # Atualiza pontuação
+                        pontuacao_texto.undraw()
+                        pontuacao_texto = gf.Text(gf.Point(520, 25), pontuacao).draw(win)
+                    break
+
+            # Se o boss passou pela base
+            if boss.getAnchor().getY() >= 650:
+                boss.undraw()
+                boss_control = False
+
+                # Perde vida
+                if len(lista_vidas) > 0:
+                    vida_perdida = lista_vidas.pop()
+                    vida_perdida.undraw()
+                else:
+                    tecla = "Escape"
+
+    sleep(0.0016)     # delay dos quadros do jogo
 
 with open('ranking_local.txt', 'a') as ranking:
     ranking.write(f'{str(pontuacao)};')
@@ -182,5 +243,4 @@ with open('ranking_local.txt', 'a') as ranking:
     # futuramente irá aceitar um input para o nome do jogador
     # terá opção de olhar o ranking
 
-
-win.getMouse()
+# teste do kaua
