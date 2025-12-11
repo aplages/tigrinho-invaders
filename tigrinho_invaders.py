@@ -174,7 +174,13 @@ while tecla != 'Escape':
 fim_tela = gf.Rectangle(gf.Point(0, 0), gf.Point(largura_janela, altura_janela))
 fim_tela.draw(win).setFill('white')
 fim_text = gf.Text(gf.Point(largura_janela/2, (altura_janela/2)-20), f"FIM DE JOGO\n\nSua pontuação foi {pontuacao}").draw(win)
-botao_menu = gf.Rectangle(gf.Point((largura_janela/2)-40, (altura_janela/2)+30), gf.Point((largura_janela/2)+40, (altura_janela/2)+70)).draw(win)
+gf.Rectangle(gf.Point((largura_janela/2)-80, (altura_janela/2)+30), gf.Point((largura_janela/2)+80, (altura_janela/2)+70)).draw(win) # BOTAO MENU
+gf.Text(gf.Point(largura_janela/2, (altura_janela/2)+50), 'Menu Principal').draw(win) # TEXTO DO BOTAO MENU
+
+gf.Rectangle(gf.Point((largura_janela/2)-80, (altura_janela/2)+80), gf.Point((largura_janela/2)+80, (altura_janela/2)+120)).draw(win) # BOTAO RANKING
+gf.Text(gf.Point(largura_janela/2, (altura_janela/2)+100), 'Ranking Local').draw(win) # TEXTO DO BOTAO RANKING
+
+gf.Text(gf.Point(largura_janela/2, (altura_janela/2)+175), 'Pressione "Esc" para fechar o jogo.').draw(win) # TEXTO DE SAIDA
 
 with open('ranking_local.txt', 'a') as ranking:
     ranking.write(f'{str(pontuacao)};')
