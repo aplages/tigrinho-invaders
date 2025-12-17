@@ -8,10 +8,24 @@ win = gf.GraphWin("Teste de Jogo", largura_janela, altura_janela)
 pontuacao_tela = gf.Rectangle(gf.Point(450, 10), gf.Point(590, 40))
 pontuacao_tela.draw(win).setFill('white')
 
-
-
 win.setBackground("gray")
 
+def separa_ranking(lista_rankeada, n=10):
+    cont = 0
+    ranking_separado = []
+    temp = []
+    for j in lista_rankeada:
+        if cont < 10:
+            temp.append(j)
+            cont += 1
+        else:
+            ranking_separado.append(temp)
+            temp = []
+            temp.append(j)
+            cont = 1
+    if temp != []:
+        ranking_separado.append(temp)
+    return ranking_separado
 
 def move_sprite(sprite, x_min=0, y_min=0, x_max=largura_janela, y_max=altura_janela, dX=0, dY=0):
     # é possivel dar um limite usando (x_min, y_min, x_max, y_max)
@@ -176,13 +190,19 @@ def menu_inicial(largura_janela=win.getWidth(), altura_janela=win.getHeight()):
             if ((largura_janela/2)-80) <= mouse.x <= ((largura_janela/2)+80) and ((altura_janela/2)-20) <= mouse.y <= ((altura_janela/2)+20):
                 return 'Joga'
 
-def tela_final(pontuacao, largura_janela=win.getWidth(), altura_janela=win.getHeight()):
+def tela_final(pontuacao, salvou, largura_janela=win.getWidth(), altura_janela=win.getHeight()):
     fim_tela = gf.Rectangle(gf.Point(0, 0), gf.Point(largura_janela, altura_janela))
     fim_tela.draw(win).setFill('white')
+    salvou_pont = salvou # variável pra testar se JÁ salvou a pontuação
     gf.Text(gf.Point(largura_janela/2, (altura_janela/2)-175), f"FIM DE JOGO\n\nSua pontuação foi {pontuacao}").draw(win)
 
-    gf.Rectangle(gf.Point((largura_janela/2)-80, (altura_janela/2)-70), gf.Point((largura_janela/2)+80, (altura_janela/2)-30)).draw(win) # BOTAO SALVAR PONTUACAO
-    gf.Text(gf.Point(largura_janela/2, (altura_janela/2)-50), 'Salvar Pontuação').draw(win) # TEXTO DO BOTAO SALVAR PONTUACAO
+    if not salvou_pont:
+        gf.Rectangle(gf.Point((largura_janela/2)-80, (altura_janela/2)-70), gf.Point((largura_janela/2)+80, (altura_janela/2)-30)).draw(win) # BOTAO SALVAR PONTUACAO
+        gf.Text(gf.Point(largura_janela/2, (altura_janela/2)-50), 'Salvar Pontuação').draw(win) # TEXTO DO BOTAO SALVAR PONTUACAO
+    else:
+        gf.Rectangle(gf.Point((largura_janela/2)-80, (altura_janela/2)-70), gf.Point((largura_janela/2)+80, (altura_janela/2)-30)).draw(win) # BOTAO SALVAR PONTUACAO (já salvou)
+        gf.Text(gf.Point(largura_janela/2, (altura_janela/2)-50), 'Salvo✅').draw(win) # TEXTO DO BOTAO SALVAR PONTUACAO (já salvou)
+
 
     gf.Rectangle(gf.Point((largura_janela/2)-80, (altura_janela/2)-20), gf.Point((largura_janela/2)+80, (altura_janela/2)+20)).draw(win) # BOTAO JOGAR NOVAMENTE
     gf.Text(gf.Point(largura_janela/2, (altura_janela/2)), 'Jogar Novamente').draw(win) # TEXTO DO BOTAO JOGAR NOVAMENTE
@@ -201,13 +221,16 @@ def tela_final(pontuacao, largura_janela=win.getWidth(), altura_janela=win.getHe
         # futuramente irá aceitar um input para o nome do jogador
         # terá opção de olhar o ranking
     
-    salvou_pont = False # variável pra testar se JÁ salvou a pontuação
-    salvando_pont = True # variável pra testar se ESTÁ SALVANDO a pontuação
+    if not salvou_pont:
+        salvando_pont = True # variável pra testar se ESTÁ SALVANDO a pontuação (serve pra salvar a pontualção DEPOIS do jogador escrever o nome dele)
+    else:
+        salvando_pont = False
+    
     while True:
         tecla = win.checkKey()
         mouse = win.checkMouse()
         if tecla == 'Escape':
-            return 'Sair'
+            return ('Sair', salvou_pont)
         if mouse != None:
             if ((largura_janela/2)-80) <= mouse.x <= ((largura_janela/2)+80):
                 if ((altura_janela/2)-70) <= mouse.y <= ((altura_janela/2)-30) and not salvou_pont: # salvar pontuacao
@@ -229,86 +252,119 @@ def tela_final(pontuacao, largura_janela=win.getWidth(), altura_janela=win.getHe
                         gf.Rectangle(gf.Point((largura_janela/2)-80, (altura_janela/2)-70), gf.Point((largura_janela/2)+80, (altura_janela/2)-30)).draw(win).setFill('white') # BOTAO SALVAR PONTUACAO
                         gf.Text(gf.Point(largura_janela/2, (altura_janela/2)-50), 'Salvo✅').draw(win) # TEXTO DO BOTAO SALVAR PONTUACAO
                 elif ((altura_janela/2)-20) <= mouse.y <= ((altura_janela/2)+20): # jogar novamente
-                    return 'Joga'
+                    return ('Joga', salvou_pont)
                 elif ((altura_janela/2)+30) <= mouse.y <= ((altura_janela/2)+70): # menu principal
-                    return 'Menu'
+                    return ('Menu', salvou_pont)
                 elif ((altura_janela/2)+80) <= mouse.y <= ((altura_janela/2)+120): # ver ranking
-                    return 'Local'
+                    return ('Local', salvou_pont)
 
-def desenha_ranking(largura_janela=win.getWidth(), altura_janela=win.getHeight()):
-    gf.Text(gf.Point(largura_janela/2, 25), f"Ranking Local:").draw(win)
-    altura = 50
+def desenha_ranking(ranking_separado, len_ranking, n=0, largura_janela=win.getWidth(), altura_janela=win.getHeight()):
+        #fim_tela = gf.Rectangle(gf.Point(0, 0), gf.Point(largura_janela, altura_janela))
+        #fim_tela.draw(win).setFill('white')
+        gf.Rectangle(gf.Point(0, 0), gf.Point(largura_janela, altura_janela)).draw(win).setFill('white')
+        gf.Text(gf.Point(largura_janela/2, 25), f"Ranking Local:").draw(win)
+        
+        altura = 50
+        for jogador in ranking_separado[n]:
+            gf.Rectangle(gf.Point((largura_janela/2)-80, (altura)), gf.Point((largura_janela/2)+80, altura+30)).draw(win) # Quadrado do playerX
+            gf.Text(gf.Point(largura_janela/2, altura+15), f'{jogador[1].strip()} - {jogador[0]}').draw(win) # Nome do playerX
+            altura += 65
+        
+        altura = 725
+        gf.Rectangle(gf.Point(50, (altura)), gf.Point(150, altura+50)).draw(win) # Quadrado do botao MENU
+        gf.Text(gf.Point(100, altura+25), 'Menu').draw(win) # Texto botao MENU
+        
+        gf.Rectangle(gf.Point(largura_janela-150, (altura)), gf.Point(largura_janela-50, altura+50)).draw(win) # Quadrado do botao VOLTAR
+        gf.Text(gf.Point(largura_janela-100, altura+25), 'Voltar').draw(win) # Texto botao VOLTAR
+
+        gf.Rectangle(gf.Point((largura_janela/2)+50, (altura)), gf.Point((largura_janela/2)+75, altura+25)).draw(win) # Quadrado do botao BAIXO
+        gf.Text(gf.Point((largura_janela/2)+62.5, altura+12.5), '⬇').draw(win) # Texto botao BAIXO
+
+        gf.Rectangle(gf.Point((largura_janela/2)-75, (altura)), gf.Point((largura_janela/2)-50, altura+25)).draw(win) # Quadrado do botao CIMA
+        gf.Text(gf.Point((largura_janela/2)-62.5, altura+12.5), '⬆').draw(win) # Texto botao CIMA
+
+        gf.Text(gf.Point((largura_janela/2), altura+12.5), f'{n+1}/{len_ranking+1}').draw(win) # Texto PAGINA ATUAL
+
+def ver_ranking(largura_janela=win.getWidth(), altura_janela=win.getHeight()):
+    #fim_tela = gf.Rectangle(gf.Point(0, 0), gf.Point(largura_janela, altura_janela))
+    #fim_tela.draw(win).setFill('white')
+    #gf.Text(gf.Point(largura_janela/2, 25), f"Ranking Local:").draw(win)
+    
     with open('ranking_local.csv', 'r') as arq:
         ranking_temp = arq.readlines()
         ranking = []
-        for i in ranking_temp: # cria sub-listas contendo: 0 = pontuacao // 1 = nome do jogador
+        for i in ranking_temp: # cria sub-listas contendo: [0] = pontuacao // [1] = nome do jogador
             ranking.append(i.split(';'))
         for n in range(len(ranking)): # faz a pontuação do jogador virar int() -- sem isso, o sorted() dá errado
             ranking[n][0] = int(ranking[n][0])
         ranking = sorted(ranking, reverse=True) # organiza o ranking por ordem de pontuação decrescente
 
-        #print(ranking)
 
-        ## criando páginas: (nao está pronto)
-        cont = 0
-        ranking_separado = []
-        temp = []
-        for j in ranking:
-            if cont < 10:
-                temp.append(j)
-                cont += 1
-            else:
-                ranking_separado.append(temp)
-                temp = []
-                temp.append(j)
-                cont += 1
+        ranking_separado = separa_ranking(ranking) # ranking separado cria um ranking separado por páginas de len(10)
+        arq.close()
+    max = len(ranking_separado)-1
 
-        #print(ranking_separado)
-        ## criando páginas ^^
-
-
-        for jogador in ranking:
-            gf.Rectangle(gf.Point((largura_janela/2)-80, (altura)), gf.Point((largura_janela/2)+80, altura+30)).draw(win) # BOTAO SALVAR PONTUACAO
-            gf.Text(gf.Point(largura_janela/2, altura+15), f'{jogador[1].strip()} - {jogador[0]}').draw(win) # TEXTO DO BOTAO SALVAR PONTUACAO
-            altura += 50
-
-
-def ver_ranking(largura_janela=win.getWidth(), altura_janela=win.getHeight()):
-    fim_tela = gf.Rectangle(gf.Point(0, 0), gf.Point(largura_janela, altura_janela))
-    fim_tela.draw(win).setFill('white')
-    desenha_ranking()
+    desenha_ranking(ranking_separado, len_ranking=max)
+    
+    print(max)
+    pag = 0
     while True:
         tecla = win.checkKey()
-        #mouse = win.checkMouse()
+        mouse = win.checkMouse()
         if tecla == 'Escape':
-            return 'Sair'
-        elif tecla == 'a':
             return 'Menu'
-        #if mouse != None:
+        elif tecla == 'Backspace':
+            return 'Fim'
+        elif tecla == 'Down':
+            if pag < max:
+                pag += 1
+            desenha_ranking(ranking_separado, len_ranking=max, n=pag)
+        elif tecla == 'Up':
+            if pag > 0:
+                pag -= 1
+            desenha_ranking(ranking_separado, len_ranking=max, n=pag)
+        elif mouse != None:
             print(mouse, type(mouse))
-            if ((largura_janela/2)-80) <= mouse.x <= ((largura_janela/2)+80) and ((altura_janela/2)-20) <= mouse.y <= ((altura_janela/2)+20):
-                return 'Joga'
+            #if ((largura_janela/2)-80) <= mouse.x <= ((largura_janela/2)+80) and ((altura_janela/2)-20) <= mouse.y <= ((altura_janela/2)+20):
+                #return 'Joga'
+            if mouse.y > 725:
+                if 50 <= mouse.x <= 150 and mouse.y <= 775:
+                    return 'Menu'
+                elif (largura_janela-150) <= mouse.x <= (largura_janela-50) and mouse.y <= 775:
+                    return 'Fim'
+                elif ((largura_janela/2)+50) <= mouse.x <= ((largura_janela/2)+75) and mouse.y <= 750:
+                    if pag < max:
+                        pag += 1
+                    desenha_ranking(ranking_separado, len_ranking=max, n=pag)
+                elif ((largura_janela/2)-75) <= mouse.x <= ((largura_janela/2)-50) and mouse.y <= 750:
+                    if pag > 0:
+                        pag -= 1
+                    desenha_ranking(ranking_separado, len_ranking=max, n=pag)
+                
 
 
 
 opcao = 'Menu'
+salvou = False
 while True:
     if opcao == 'Menu':
         opcao = menu_inicial(largura_janela, altura_janela)
         #if ((largura_janela/2)-80) <= teste.getX() <= ((largura_janela/2)+80) and ((altura_janela/2)-20) <= teste.getY() <= ((altura_janela/2)+20):
             #opcao = 'Joga'
+    
     if opcao == 'Joga':
-        #break # sai da tela inicial e inicia o jogo
+        salvou = False # caso o jogador já tenha salvo a sua pontuação e esteja jogando novamente, ele pode salvar sua nova pontuação depois
         pontuacao = joga(largura_janela, altura_janela)
         opcao = 'Fim'
+    
     if opcao == 'Fim':
-        opcao = tela_final(pontuacao)
+        retornos = tela_final(pontuacao, salvou) # Essa tela retorna uma tupla pq o jogador pode ter salvo (ou nao) a pontuação dele. **Nao queremos q ele salve a mesma pontuação dnv =)
+        opcao = retornos[0]
+        salvou = retornos[1]
+    
     if opcao == 'Sair':
         break
+    
     if opcao == 'Local':
         opcao = ver_ranking()
-    #teste = win.getMouse()
-##
-
-
-
+    
