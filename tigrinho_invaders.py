@@ -62,8 +62,8 @@ def colisao_do_tiro(tiro, sprite): # compara as coordenadas do tiro e da sprite 
 
 def joga(largura_janela=win.getWidth(), altura_janela=win.getHeight()):
     ## JOGO
-    fundo = gf.Image(gf.Point(largura_janela/2, altura_janela/2 ), "imagens/fundo.png")
-    fundo.draw(win)
+    gf.Image(gf.Point(largura_janela/2, altura_janela/2 ), "imagens/fundo.png").draw(win) # FUNDO
+
     pontuacao_tela = gf.Rectangle(gf.Point(450, 10), gf.Point(590, 40)) #Visor da pontuação
     pontuacao_tela.draw(win).setFill('gray')
     pontuacao = 0
@@ -87,6 +87,8 @@ def joga(largura_janela=win.getWidth(), altura_janela=win.getHeight()):
     lista_inimigos = []
     lista_vidas = []
     posi_vida = 40
+    ciclo = 1
+    boss_control = False
 
 
     while len(lista_vidas) < 3:
@@ -98,19 +100,18 @@ def joga(largura_janela=win.getWidth(), altura_janela=win.getHeight()):
     while tecla != 'Escape':
         tecla = win.checkKey()
         clique = win.checkMouse()
-        temp = []
+        
 
-
-        if tecla == "Right" or tecla == 'd':
+        if tecla == "Right" or tecla == 'd' or tecla == 'D':
             move_sprite(sprite=p1, x_min=20, y_min=660, x_max=580, y_max=780, dX=vel)
 
-        elif tecla == "Left" or tecla == 'a':
+        elif tecla == "Left" or tecla == 'a' or tecla == 'A':
             move_sprite(sprite=p1, x_min=20, y_min=660, x_max=580, y_max=780, dX=-vel)
         
-        elif tecla == "Up" or tecla == 'w':
+        elif tecla == "Up" or tecla == 'w' or tecla == 'W':
             move_sprite(sprite=p1, x_min=20, y_min=660, x_max=580, y_max=780, dY=-vel)
 
-        elif tecla == "Down" or tecla == 's':
+        elif tecla == "Down" or tecla == 's' or tecla == 'S':
             move_sprite(sprite=p1, x_min=20, y_min=660, x_max=580, y_max=780, dY=vel)
         
         if not tiro_p1_liberado:
@@ -125,12 +126,10 @@ def joga(largura_janela=win.getWidth(), altura_janela=win.getHeight()):
             if tiro_p1_liberado:
                 tiro_p1.draw(win)
                 lista_de_tiros.append(tiro_p1) # cada tiro faz parte de uma lista
-                tiro_p1_liberado = False
+                tiro_p1_liberado = False # ativa o delay do tiro
 
-
-        
         for i in lista_de_tiros: # loop para mover todos tiros da lista
-            i.move(0, -1)
+            i.move(0, -0.5-(0.5*ciclo))
             for ini in lista_inimigos:
                 if colisao_do_tiro(i, ini): # usa a funçao de colisao de tiro, se True, ele destrói o inimigo e o tiro
                     i.undraw()
@@ -146,39 +145,103 @@ def joga(largura_janela=win.getWidth(), altura_janela=win.getHeight()):
                 lista_de_tiros.pop(0) # remove o tiro da lista, o índice teoricamente é sempre 0 por que o mais antigo sempre estará o mais longe e será o primeiro da lista
 
 
+        if pontuacao < (30 * ciclo):
+            if len(lista_inimigos) < (3 + ciclo):
+                inimigo = gf.Image(gf.Point((randint(15, 585)), 0), "imagens/inimigo.png") # sprite inimigo
+                inimigo.draw(win)
+                lista_inimigos.append(inimigo)
+            
 
-        if len(lista_inimigos) < 4:
-            inimigo = gf.Image(gf.Point((randint(15, 585)), 0), "imagens/inimigo.png") # sprite inimigo
-            inimigo.draw(win)
-            lista_inimigos.append(inimigo)
-        
 
+            for j in lista_inimigos: # loop para mover todos os inimigos da lista
+                j.move(0, 0.2)
+                if j.getAnchor().getY() >= 650: # caso o inimigo chegue na base ele é destruido
+                    j.undraw()
+                    lista_inimigos.remove(j)
+                    if len(lista_vidas) > 0:
+                        vida_perdida = lista_vidas.pop()
+                        vida_perdida.undraw()
+                    else:
+                        tecla = 'Escape' # se não tiver mais vidas, o jogo termina
+                        
+        else:
+            # Quando a pontuação atingir o alvo
+            if pontuacao >= (30 * ciclo):
 
-        for j in lista_inimigos: # loop para mover todos os inimigos da lista
-            j.move(0, 0.2)
-            if j.getAnchor().getY() >= 650: # caso o inimigo chegue na base ele é destruido
-                j.undraw()
-                lista_inimigos.remove(j)
-                if len(lista_vidas) > 1:
-                    vida_perdida = lista_vidas.pop()
-                    vida_perdida.undraw()
+                # Remove inimigos comuns da tela
+                for ini in lista_inimigos:
+                    ini.undraw()
+                lista_inimigos = []
+
+                # Criar boss 
+                if not boss_control:
+                    boss_control = True
+                    boss_vida = 3
+                    boss = gf.Image(gf.Point(randint(50, 550), 100), "imagens/boss.png")
+                    boss.draw(win)
+                    direcao_boss = 'direita'
+
+                # Mover boss para baixo
+                if direcao_boss == 'direita':
+                    move_sprite(boss, dX=0.5, x_max=largura_janela-25, x_min=50)
+                    if boss.anchor.getX() >= (largura_janela-25):
+                        direcao_boss = 'esquerda'
+                        move_sprite(boss, dY=10, y_max=altura_janela-25, y_min=100)
                 else:
-                    tecla = 'Escape' # se não tiver mais vidas, o jogo termina
+                    move_sprite(boss, dX=-0.5, x_max=largura_janela-25, x_min=50)
+                    if boss.anchor.getX() <= (50):
+                        direcao_boss = 'direita'
+                        move_sprite(boss, dY=10, y_max=altura_janela-25, y_min=100)
 
 
-        sleep(0.0016) # delay dos quadros do jogo
+                # Verificar colisão dos tiros com o boss
+                for tiro in lista_de_tiros[:]:  
+                    tiro.move(0, -1)
+
+                    if colisao_do_tiro(tiro, boss):
+                        tiro.undraw()
+                        lista_de_tiros.remove(tiro)
+                        boss_vida -= 1
+                        print(f"Vida do boss: {boss_vida}")
+
+                        # Se o boss morrer
+                        if boss_vida <= 0:
+                            boss.undraw()
+                            boss_control = False
+                            ciclo += 1
+                            if ciclo <= 10:
+                                vel = vel + ciclo
+        
+                            pontuacao += 10
+
+                            # Atualiza pontuação
+                            pontuacao_texto.undraw()
+                            pontuacao_texto = gf.Text(gf.Point(520, 25), pontuacao).draw(win)
+                        break
+
+                # Se o boss passou pela base
+                if boss.getAnchor().getY() >= 650:
+                    boss.undraw()
+                    boss_control = False
+
+                    # Perde vida
+                    if len(lista_vidas) > 0:
+                        vida_perdida = lista_vidas.pop()
+                        vida_perdida.undraw()
+                    else:
+                        tecla = "Escape"
+
+        sleep(0.0016)     # delay dos quadros do jogo
 
     return pontuacao
 # fim da funcao joga()
 
 def menu_inicial(largura_janela=win.getWidth(), altura_janela=win.getHeight()):
     ## MENU INICIAL
-    fundo = gf.Image(gf.Point(largura_janela/2, altura_janela/2 ), "imagens/tigrinho_fundo.png")
-    fundo.draw(win)
+    gf.Image(gf.Point(largura_janela/2, altura_janela/2 ), "imagens/tigrinho_fundo.png").draw(win) # FUNDO
 
-    botao_play = gf.Rectangle(gf.Point((largura_janela/2)-80, (altura_janela/2)-20), gf.Point((largura_janela/2)+80, (altura_janela/2)+20))
-    botao_play.draw(win).setFill('white')
-    texto_play = gf.Text(gf.Point(largura_janela/2, altura_janela/2), 'Jogar').draw(win)
+    gf.Rectangle(gf.Point((largura_janela/2)-80, (altura_janela/2)-20), gf.Point((largura_janela/2)+80, (altura_janela/2)+20)).draw(win).setFill('white') # botao PLAY
+    gf.Text(gf.Point(largura_janela/2, altura_janela/2), 'Jogar').draw(win) # texto PLAY
 
     while True:
         tecla = win.checkKey()
@@ -367,4 +430,3 @@ while True:
     
     if opcao == 'Local':
         opcao = ver_ranking()
-    
