@@ -5,10 +5,7 @@ from time import sleep
 largura_janela = 600
 altura_janela = 800
 win = gf.GraphWin("Teste de Jogo", largura_janela, altura_janela)
-pontuacao_tela = gf.Rectangle(gf.Point(450, 10), gf.Point(590, 40))
-pontuacao_tela.draw(win).setFill('white')
 
-win.setBackground("gray")
 
 def separa_ranking(lista_rankeada, n=10):
     cont = 0
@@ -27,7 +24,7 @@ def separa_ranking(lista_rankeada, n=10):
         ranking_separado.append(temp)
     return ranking_separado
 
-def move_sprite(sprite, x_min=0, y_min=0, x_max=largura_janela, y_max=altura_janela, dX=0, dY=0):
+def move_sprite(sprite, x_min=0, y_min=0, x_max=win.getWidth(), y_max=win.getHeight(), dX=0, dY=0):
     # é possivel dar um limite usando (x_min, y_min, x_max, y_max)
         # x_min # limite mínimo para o eixo X, o padrão é 0
         # y_min # limite mínimo para o eixo y, o padrão é 0
@@ -202,7 +199,7 @@ def joga(largura_janela=win.getWidth(), altura_janela=win.getHeight()):
                         tiro.undraw()
                         lista_de_tiros.remove(tiro)
                         boss_vida -= 1
-                        print(f"Vida do boss: {boss_vida}")
+                        #print(f"Vida do boss: {boss_vida}")
 
                         # Se o boss morrer
                         if boss_vida <= 0:
@@ -234,7 +231,6 @@ def joga(largura_janela=win.getWidth(), altura_janela=win.getHeight()):
         sleep(0.0016)     # delay dos quadros do jogo
 
     return pontuacao
-# fim da funcao joga()
 
 def menu_inicial(largura_janela=win.getWidth(), altura_janela=win.getHeight()):
     ## MENU INICIAL
@@ -369,7 +365,7 @@ def ver_ranking(largura_janela=win.getWidth(), altura_janela=win.getHeight()):
 
     desenha_ranking(ranking_separado, len_ranking=max)
     
-    print(max)
+    #print(max)
     pag = 0
     while True:
         tecla = win.checkKey()
@@ -387,7 +383,7 @@ def ver_ranking(largura_janela=win.getWidth(), altura_janela=win.getHeight()):
                 pag -= 1
             desenha_ranking(ranking_separado, len_ranking=max, n=pag)
         elif mouse != None:
-            print(mouse, type(mouse))
+            #print(mouse, type(mouse))
             #if ((largura_janela/2)-80) <= mouse.x <= ((largura_janela/2)+80) and ((altura_janela/2)-20) <= mouse.y <= ((altura_janela/2)+20):
                 #return 'Joga'
             if mouse.y > 725:
@@ -405,19 +401,22 @@ def ver_ranking(largura_janela=win.getWidth(), altura_janela=win.getHeight()):
                     desenha_ranking(ranking_separado, len_ranking=max, n=pag)
                 
 
+pontuacao_tela = gf.Rectangle(gf.Point(450, 10), gf.Point(590, 40))
+pontuacao_tela.draw(win).setFill('white')
 
+win.setBackground("gray")
 
 opcao = 'Menu'
 salvou = False
 while True:
     if opcao == 'Menu':
-        opcao = menu_inicial(largura_janela, altura_janela)
+        opcao = menu_inicial()
         #if ((largura_janela/2)-80) <= teste.getX() <= ((largura_janela/2)+80) and ((altura_janela/2)-20) <= teste.getY() <= ((altura_janela/2)+20):
             #opcao = 'Joga'
     
     if opcao == 'Joga':
         salvou = False # caso o jogador já tenha salvo a sua pontuação e esteja jogando novamente, ele pode salvar sua nova pontuação depois
-        pontuacao = joga(largura_janela, altura_janela)
+        pontuacao = joga()
         opcao = 'Fim'
     
     if opcao == 'Fim':
